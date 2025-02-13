@@ -1,0 +1,49 @@
+npx sequelize-cli init
+
+npx sequelize-cli db:migrate
+
+npm install --dev @babel/core @babel/node @babel/preset-env
+
+npx sequelize-cli  db:migrate:undo
+npx sequelize-cli  db:migrate:undo:all
+
+npx sequelize-cli model:generate --name User --attributes name:string,email:string,password:string,role:integer,phone:string,address:text,avtart:text,is_locked:integer --underscored
+
+npx sequelize-cli model:generate --name Artist --attributes name:string,image:text,bio:text --underscored
+npx sequelize-cli model:generate --name Genre --attributes name:string,description:text --underscored
+
+npx sequelize-cli model:generate --name Format --attributes name:string,description:text --underscored
+
+npx sequelize-cli model:generate --name FormatDetail --attributes format_id:integer,product_id:integer,price:integer,old_price:integer,stock:integer --underscored
+
+npx sequelize-cli model:generate --name GenreDetail --attributes genre_id:integer,product_id:integer --underscored
+
+npx sequelize-cli model:generate --name Label --attributes name:string,image:text,description:text --underscored
+
+npx sequelize-cli model:generate --name News --attributes title:string,image:text,content:text,active:boolean --underscored
+
+npx sequelize-cli model:generate --name Invoice --attributes order_id:integer,invoice_number:string,payment_status:integer,total_amount:integer --underscored
+
+npx sequelize-cli model:generate --name Order --attributes user_id:INTEGER,order_date:DATE,total_amount:INTEGER,status:INTEGER,shipping_address:STRING --underscored
+
+npx sequelize-cli model:generate --name Feedback --attributes user_id:INTEGER,product_id:integer,rating:decimal,comment:text --underscored
+
+npx sequelize-cli model:generate --name Product --attributes name:string,artist_id:integer,genre_id:integer,release_date:date,price:integer,stock:integer,label_id:integer,format_id:integer,description:string,image:text,active:boolean --underscored
+
+npx sequelize-cli model:generate --name OrderDetail --attributes order_id:integer,product_id:integer,quantity:integer,total_price:integer --underscored
+
+npx sequelize-cli model:generate --name PromotionDetail --attributes promotion_id:integer,product_id:integer --underscored
+
+npx sequelize-cli model:generate --name Promotion --attributes product_id:integer,percent:decimal,active:boolean,start_date:date,end_date:date --underscored
+
+npx sequelize-cli model:generate --name NewsDetail --attributes news_id:integer,product_id:integer --underscored
+
+npx sequelize-cli model:generate --name Cart --attributes user_id:integer,session_id:string --underscored
+
+npx sequelize-cli model:generate --name CartItem --attributes cart_id:integer,product_id:integer,quantity:integer --underscored
+
+select * from information_schema.table_constraints where table_schema = 'albumshop' and table_name = 'news';
+
+npx sequelize-cli migration:generate --name add_session_to_orders
+
+npm i express dotenv nodemon
