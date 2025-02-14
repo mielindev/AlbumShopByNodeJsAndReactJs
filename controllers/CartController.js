@@ -1,7 +1,35 @@
+import { Op } from "sequelize";
 import db from "../models";
 
 // Tạo giỏ hàng mới
 export const insertCart = async (req, res) => {
+  const { user_id, session_id } = req.body;
+  if ((session_id && user_id) || (!session_id && !user_id)) {
+    return res.status(400).json({
+      message: "Chỉ được phép một trong hai giá trị session_id hoặc user_id",
+    });
+  }
+  if (user_id) {
+    const isUserExisted = await db.User.findByPk(user_id);
+    if (!isUserExisted) {
+      return res.status(404).json({
+        message: "Không tìm thấy người dùng",
+      });
+    }
+  }
+  const isCartExisted = await db.Cart.findOne({
+    where: {
+      [Op.or]: [
+        { session_id: session_id ? session_id : null },
+        { user_id: user_id ? user_id : null },
+      ],
+    },
+  });
+  if (isCartExisted) {
+    return res.status(409).json({
+      message: "Đã tồn tại giỏ hàng với cùng session_id hoặc user_id",
+    });
+  }
   const cart = await db.Cart.create(req.body);
   return res.status(201).json({
     message: "Tạo giỏ hàng thành công",
@@ -23,6 +51,12 @@ export const getAllCarts = async (req, res) => {
   const [carts, totalCarts] = await Promise.all([
     db.Cart.findAll({
       where: whereClause,
+      include: [
+        {
+          model: db.CartItem,
+          as: "cart_items",
+        },
+      ],
       limit: parsePageSize,
       offset,
     }),

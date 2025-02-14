@@ -1,14 +1,17 @@
+import { Op } from "sequelize";
 import db from "../models";
 
 // Thêm sản phẩm vào giỏ hàng
 export const insertCartItem = async (req, res) => {
-  const { cart_id, product_id } = req.body;
+  const { cart_id, product_id, quantity, format_id } = req.body;
+
   const cart = await db.Cart.findByPk(cart_id);
   if (!cart) {
     return res.status(404).json({
       message: "Không tìm thấy giỏ hàng",
     });
   }
+
   const product = await db.Product.findByPk(product_id);
   if (!product) {
     return res.status(404).json({
@@ -16,11 +19,78 @@ export const insertCartItem = async (req, res) => {
     });
   }
 
-  const cartItem = await db.CartItem.create(req.body);
+  const productInStock = await db.FormatDetail.findOne({
+    where: { product_id, format_id },
+  });
 
-  return res.status(201).json({
-    message: "Thêm sản phẩm vào giỏ hàng thành công",
-    data: cartItem,
+  if (productInStock) {
+    if (quantity > productInStock.stock) {
+      return res.status(400).json({
+        message: "Sản phẩm trong kho không đủ",
+      });
+    }
+  } else {
+    return res.status(404).json({
+      message: "Sản phẩm không tồn tại định dạng này",
+    });
+  }
+
+  const isExistingCartItem = await db.CartItem.findOne({
+    where: {
+      cart_id,
+      product_id,
+      format_id,
+    },
+  });
+
+  let discountPercent = 0;
+  const isProductDiscount = await db.PromotionDetail.findOne({
+    where: { product_id },
+  });
+  if (isProductDiscount) {
+    const promotion = await db.Promotion.findByPk(
+      isProductDiscount.promotion_id
+    );
+    discountPercent = promotion.percent;
+  }
+
+  if (isExistingCartItem) {
+    if (quantity === 0) {
+      await isExistingCartItem.destroy();
+      return res.status(200).json({
+        message: "Xoá thành công danh mục trong giỏ hàng",
+      });
+    } else {
+      isExistingCartItem.quantity = quantity;
+      isExistingCartItem.total_price =
+        quantity *
+        (productInStock.price - productInStock.price * (discountPercent / 100));
+      await isExistingCartItem.save();
+      return res.status(200).json({
+        message: "Cập nhật thành công danh mục trong giỏ hàng",
+        data: isExistingCartItem,
+      });
+    }
+  } else {
+    if (quantity > 0) {
+      const cartItem = await db.CartItem.create({
+        cart_id,
+        product_id,
+        quantity,
+        format_id,
+        total_price:
+          quantity *
+          (productInStock.price -
+            productInStock.price * (discountPercent / 100)),
+      });
+      return res.status(201).json({
+        message: "Thêm sản phẩm vào giỏ hàng thành công",
+        data: cartItem,
+      });
+    }
+  }
+  return res.status(400).json({
+    message: "Không thể thêm sản phẩm với số lượng bằng 0",
   });
 };
 
@@ -53,16 +123,24 @@ export const getCartItems = async (req, res) => {
   });
 };
 
-export const getCartItemById = async (req, res) => {
-  const { id } = req.params;
-  const cartItem = await db.CartItem.findByPk(id);
-  if (!cartItem) {
+export const getCartItemByCartId = async (req, res) => {
+  const { cart_id } = req.params;
+  const isCartExisted = await db.Cart.findOne({
+    where: { id: cart_id },
+  });
+  if (!isCartExisted) {
     return res.status(404).json({
-      message: "Không tìm thấy sản phẩm trong giỏ hàng",
+      message: "Không tìm thấy giỏ hàng",
+      data: cartItems,
     });
   }
+  const cartItems = await db.CartItem.findAll({
+    where: { cart_id },
+  });
+
   return res.status(200).json({
     message: "Lấy thành công sản phẩm trong giỏ hàng",
+    data: cartItems,
   });
 };
 

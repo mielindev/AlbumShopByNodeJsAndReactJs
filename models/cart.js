@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Cart.hasMany(models.CartItem, {
         foreignKey: "cart_id",
+        as: "cart_items",
       });
     }
   }
