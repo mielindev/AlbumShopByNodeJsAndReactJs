@@ -129,7 +129,7 @@ export const deleteCart = async (req, res) => {
 };
 
 export const checkoutCart = async (req, res) => {
-  const { cart_id, shipping_address, note } = req.body;
+  const { cart_id, shipping_address, note, phone } = req.body;
   const transaction = await db.sequelize.transaction();
 
   try {
@@ -156,6 +156,7 @@ export const checkoutCart = async (req, res) => {
         order_date: new Date().toISOString(),
         note,
         shipping_address,
+        phone,
         total_amount: cart.cart_items.reduce((total, item) => {
           return total + item.total_price;
         }, 0),

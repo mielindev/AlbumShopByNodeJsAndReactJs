@@ -47,3 +47,7 @@ select * from information_schema.table_constraints where table_schema = 'albumsh
 npx sequelize-cli migration:generate --name add_session_to_orders
 
 npm i express dotenv nodemon
+
+1. Pending, 2.Processing, 3.Delivering, 4. Completed, 5. Cancelled, 6. Refunded, 7. Failed
+
+ALTER TABLE orders MODIFY COLUMN status INT COMMENT '1. Pending, 2.Processing, 3.Delivering, 4. Completed, 5. Cancelled, 6. Refunded, 7. Failed';

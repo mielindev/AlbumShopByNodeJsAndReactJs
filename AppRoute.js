@@ -190,11 +190,11 @@ export const AppRoute = (app) => {
   );
 
   // Order Routes
-  router.post(
-    "/orders",
-    validate(DTOs.InsertOrderRequest),
-    asyncHandle(Controllers.OrderController.insertOrder)
-  );
+  // router.post(
+  //   "/orders",
+  //   validate(DTOs.InsertOrderRequest),
+  //   asyncHandle(Controllers.OrderController.insertOrder)
+  // );
   router.get("/orders", asyncHandle(Controllers.OrderController.getOrders));
   router.get(
     "/orders/:id",
