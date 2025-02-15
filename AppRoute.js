@@ -216,6 +216,10 @@ export const AppRoute = (app) => {
     validate(DTOs.InsertCartRequest),
     asyncHandle(Controllers.CartController.insertCart)
   );
+  router.post(
+    "/carts/checkout",
+    asyncHandle(Controllers.CartController.checkoutCart)
+  );
   router.get("/carts", asyncHandle(Controllers.CartController.getAllCarts));
   router.get("/carts/:id", asyncHandle(Controllers.CartController.getCartById));
   router.delete(

@@ -11,9 +11,11 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       OrderDetail.belongsTo(models.Order, {
         foreignKey: "order_id",
+        as: "order_details",
       });
       OrderDetail.belongsTo(models.Product, {
         foreignKey: "product_id",
+        as: "product_name",
       });
     }
   }
@@ -23,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       product_id: DataTypes.INTEGER,
       quantity: DataTypes.INTEGER,
       total_price: DataTypes.INTEGER,
+      format_id: DataTypes.INTEGER,
     },
     {
       sequelize,

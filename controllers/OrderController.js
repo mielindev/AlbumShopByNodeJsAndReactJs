@@ -37,6 +37,17 @@ export const getOrders = async (req, res) => {
   const [orders, totalOrders] = await Promise.all([
     db.Order.findAll({
       where: whereClause,
+      include: [
+        {
+          model: db.OrderDetail,
+          as: "order_details",
+          include: {
+            model: db.Product,
+            as: "product_name",
+            attributes: ["name"],
+          },
+        },
+      ],
       limit: parseInt(pageSize, 10),
       offset,
     }),
