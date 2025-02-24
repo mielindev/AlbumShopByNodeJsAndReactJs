@@ -126,7 +126,7 @@ export const updateNewsDetails = async (req, res) => {
 };
 
 // Delete a aritst
-export const deleteArtists = async (req, res) => {
+export const deleteNewsDetails = async (req, res) => {
   const { id } = req.params;
   const deleted = await db.NewsDetail.destroy({
     where: { id },

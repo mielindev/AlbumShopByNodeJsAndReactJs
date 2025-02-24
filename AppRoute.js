@@ -1,15 +1,10 @@
 import express from "express";
-import {
-  asyncHandle,
-  validate,
-  upload,
-  isImageExisted,
-  uploadCloudinary,
-} from "./middlewares/index";
+import * as middlewares from "./middlewares/index";
 
 import * as Controllers from "./controllers/index";
 
 import * as DTOs from "./dtos/requests/index";
+import userRoles from "./constants/userRoles";
 
 const router = express.Router();
 
@@ -17,370 +12,485 @@ export const AppRoute = (app) => {
   // User Routes
   router.post(
     "/users/register",
-    validate(DTOs.InsertUserRequest),
-    asyncHandle(Controllers.UserController.register)
+    middlewares.validate(DTOs.InsertUserRequest),
+    middlewares.asyncHandle(Controllers.UserController.register)
   );
-  router.get("/users", asyncHandle(Controllers.UserController.getUsers));
-  router.get("/users/:id", asyncHandle(Controllers.UserController.getUserById));
+  router.post(
+    "/users/login",
+    middlewares.validate(DTOs.LoginUserRequest),
+    middlewares.asyncHandle(Controllers.UserController.userLogin)
+  );
+  router.get(
+    "/users",
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.UserController.getUsers)
+  );
+  router.get(
+    "/users/:id",
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.asyncHandle(Controllers.UserController.getUserById)
+  );
   router.delete(
     "/users/:id",
-    asyncHandle(Controllers.UserController.deleteUser)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.UserController.deleteUser)
   );
 
   // Artist Routes
+
   router.post(
     "/artists",
-    isImageExisted,
-    validate(DTOs.InsertArtistRequest),
-    asyncHandle(Controllers.ArtistController.insertArtist)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.isImageExisted,
+    middlewares.validate(DTOs.InsertArtistRequest),
+    middlewares.asyncHandle(Controllers.ArtistController.insertArtist)
   );
-  router.get("/artists", asyncHandle(Controllers.ArtistController.getArtists));
+  router.get(
+    "/artists",
+    middlewares.asyncHandle(Controllers.ArtistController.getArtists)
+  );
   router.get(
     "/artists/:id",
-    asyncHandle(Controllers.ArtistController.getArtistById)
+    middlewares.asyncHandle(Controllers.ArtistController.getArtistById)
   );
   router.put(
     "/artists/:id",
-    isImageExisted,
-    validate(DTOs.UpdateArtistRequest),
-    asyncHandle(Controllers.ArtistController.updateArtists)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.UpdateArtistRequest),
+    middlewares.isImageExisted,
+    middlewares.asyncHandle(Controllers.ArtistController.updateArtists)
   );
   router.delete(
     "/artists/:id",
-    asyncHandle(Controllers.ArtistController.deleteArtists)
+    middlewares.asyncHandle(Controllers.ArtistController.deleteArtists),
+    middlewares.requireRoles([userRoles.ADMIN])
   );
 
   // Genre Routes
   router.post(
     "/genres",
-    validate(DTOs.InsertGenreRequest),
-    asyncHandle(Controllers.GenreController.insertGenre)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.InsertGenreRequest),
+    middlewares.asyncHandle(Controllers.GenreController.insertGenre)
   );
-  router.get("/genres", asyncHandle(Controllers.GenreController.getGenres));
+  router.get(
+    "/genres",
+    middlewares.asyncHandle(Controllers.GenreController.getGenres)
+  );
   router.get(
     "/genres/:id",
-    asyncHandle(Controllers.GenreController.getGenreById)
+    middlewares.asyncHandle(Controllers.GenreController.getGenreById)
   );
   router.put(
     "/genres/:id",
-    validate(DTOs.UpdateGenreRequest),
-    asyncHandle(Controllers.GenreController.updateGenre)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.UpdateGenreRequest),
+    middlewares.asyncHandle(Controllers.GenreController.updateGenre)
   );
   router.delete(
     "/genres/:id",
-    asyncHandle(Controllers.GenreController.deleteGenre)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.GenreController.deleteGenre)
   );
 
   // Genre Detail Routes
   router.post(
     "/genre-details",
-    validate(DTOs.InsertGenreDetailRequest),
-    asyncHandle(Controllers.GenreDetailController.insertGenreDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.InsertGenreDetailRequest),
+    middlewares.asyncHandle(Controllers.GenreDetailController.insertGenreDetail)
   );
   router.get(
     "/genre-details",
-    asyncHandle(Controllers.GenreDetailController.getGenreDetails)
+    middlewares.asyncHandle(Controllers.GenreDetailController.getGenreDetails)
   );
   router.get(
     "/genre-details/:id",
-    asyncHandle(Controllers.GenreDetailController.getGenreDetailById)
+    middlewares.asyncHandle(
+      Controllers.GenreDetailController.getGenreDetailById
+    )
   );
   router.put(
     "/genre-details/:id",
-    validate(DTOs.UpdateGenreDetailRequest),
-    asyncHandle(Controllers.GenreDetailController.updateGenreDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.UpdateGenreDetailRequest),
+    middlewares.asyncHandle(Controllers.GenreDetailController.updateGenreDetail)
   );
   router.delete(
     "/genre-details/:id",
-    asyncHandle(Controllers.GenreDetailController.deleteGenreDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.GenreDetailController.deleteGenreDetail)
   );
 
   // Label Routes
   router.post(
     "/labels",
-    isImageExisted,
-    validate(DTOs.InsertLabelRequest),
-    asyncHandle(Controllers.LabelController.insertLabel)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.isImageExisted,
+    middlewares.validate(DTOs.InsertLabelRequest),
+    middlewares.asyncHandle(Controllers.LabelController.insertLabel)
   );
-  router.get("/labels", asyncHandle(Controllers.LabelController.getLabels));
+  router.get(
+    "/labels",
+    middlewares.asyncHandle(Controllers.LabelController.getLabels)
+  );
   router.get(
     "/labels/:id",
-    asyncHandle(Controllers.LabelController.getLabelById)
+    middlewares.asyncHandle(Controllers.LabelController.getLabelById)
   );
   router.put(
     "/labels/:id",
-    isImageExisted,
-    validate(DTOs.UpdateLabelRequest),
-    asyncHandle(Controllers.LabelController.updateLabels)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.isImageExisted,
+    middlewares.validate(DTOs.UpdateLabelRequest),
+    middlewares.asyncHandle(Controllers.LabelController.updateLabels)
   );
   router.delete(
     "/labels/:id",
-    asyncHandle(Controllers.LabelController.deleteLabels)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.LabelController.deleteLabels)
   );
 
   // Format Routes
   router.post(
     "/formats",
-    validate(DTOs.InsertFormatRequest),
-    asyncHandle(Controllers.FormatController.insertFormat)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.InsertFormatRequest),
+    middlewares.asyncHandle(Controllers.FormatController.insertFormat)
   );
-  router.get("/formats", asyncHandle(Controllers.FormatController.getFormats));
+  router.get(
+    "/formats",
+    middlewares.asyncHandle(Controllers.FormatController.getFormats)
+  );
   router.get(
     "/formats/:id",
-    asyncHandle(Controllers.FormatController.getFormatById)
+    middlewares.asyncHandle(Controllers.FormatController.getFormatById)
   );
   router.put(
     "/formats/:id",
-    validate(DTOs.UpdateFormatRequest),
-    asyncHandle(Controllers.FormatController.updateFormat)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.UpdateFormatRequest),
+    middlewares.asyncHandle(Controllers.FormatController.updateFormat)
   );
   router.delete(
     "/formats/:id",
-    asyncHandle(Controllers.FormatController.deleteFormat)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.FormatController.deleteFormat)
   );
 
   // Format Detail Routes
   router.post(
     "/format-details",
-    validate(DTOs.InsertFormatDetailRequest),
-    asyncHandle(Controllers.FormatDetailController.insertFormatDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.InsertFormatDetailRequest),
+    middlewares.asyncHandle(
+      Controllers.FormatDetailController.insertFormatDetail
+    )
   );
   router.get(
     "/format-details",
-    asyncHandle(Controllers.FormatDetailController.getFormatDetails)
+    middlewares.asyncHandle(Controllers.FormatDetailController.getFormatDetails)
   );
   router.get(
     "/format-details/:id",
-    asyncHandle(Controllers.FormatDetailController.getFormatDetailById)
+    middlewares.asyncHandle(
+      Controllers.FormatDetailController.getFormatDetailById
+    )
   );
   router.put(
     "/format-details/:id",
-    validate(DTOs.UpdateFormatDetailRequest),
-    asyncHandle(Controllers.FormatDetailController.updateFormatDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.UpdateFormatDetailRequest),
+    middlewares.asyncHandle(
+      Controllers.FormatDetailController.updateFormatDetail
+    )
   );
   router.delete(
     "/format-details/:id",
-    asyncHandle(Controllers.FormatDetailController.deleteFormatDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(
+      Controllers.FormatDetailController.deleteFormatDetail
+    )
   );
 
   // Produt Routes
   router.post(
     "/products",
-    isImageExisted,
-    validate(DTOs.InsertProductRequest),
-    asyncHandle(Controllers.ProductController.insertProduct)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.isImageExisted,
+    middlewares.validate(DTOs.InsertProductRequest),
+    middlewares.asyncHandle(Controllers.ProductController.insertProduct)
   );
   router.get(
     "/products",
-    asyncHandle(Controllers.ProductController.getProducts)
+    middlewares.asyncHandle(Controllers.ProductController.getProducts)
   );
   router.get(
     "/products/:id",
-    asyncHandle(Controllers.ProductController.getProductById)
+    middlewares.asyncHandle(Controllers.ProductController.getProductById)
   );
   router.put(
     "/products/:id",
-    isImageExisted,
-    validate(DTOs.UpdateProductRequest),
-    asyncHandle(Controllers.ProductController.updateProduct)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.isImageExisted,
+    middlewares.validate(DTOs.UpdateProductRequest),
+    middlewares.asyncHandle(Controllers.ProductController.updateProduct)
   );
   router.delete(
     "/products/:id",
-    asyncHandle(Controllers.ProductController.deleteProduct)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.ProductController.deleteProduct)
   );
 
   // Order Routes
   // router.post(
   //   "/orders",
-  //   validate(DTOs.InsertOrderRequest),
-  //   asyncHandle(Controllers.OrderController.insertOrder)
+  //   middlewares.validate(DTOs.InsertOrderRequest),
+  //   middlewares.asyncHandle(Controllers.OrderController.insertOrder)
   // );
-  router.get("/orders", asyncHandle(Controllers.OrderController.getOrders));
+  router.get(
+    "/orders",
+    middlewares.asyncHandle(Controllers.OrderController.getOrders)
+  );
   router.get(
     "/orders/:id",
-    asyncHandle(Controllers.OrderController.getOrderById)
+    middlewares.asyncHandle(Controllers.OrderController.getOrderById)
   );
   router.put(
     "/orders/:id",
-    validate(DTOs.UpdateOrderRequest),
-    asyncHandle(Controllers.OrderController.updateOrder)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.validate(DTOs.UpdateOrderRequest),
+    middlewares.asyncHandle(Controllers.OrderController.updateOrder)
   );
   router.delete(
     "/orders/:id",
-    asyncHandle(Controllers.OrderController.deleteOrder)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.OrderController.deleteOrder)
   );
 
   // Cart Routes
   router.post(
     "/carts",
-    validate(DTOs.InsertCartRequest),
-    asyncHandle(Controllers.CartController.insertCart)
+    middlewares.requireRoles([userRoles.USER]),
+    middlewares.validate(DTOs.InsertCartRequest),
+    middlewares.asyncHandle(Controllers.CartController.insertCart)
   );
   router.post(
     "/carts/checkout",
-    asyncHandle(Controllers.CartController.checkoutCart)
+    middlewares.asyncHandle(Controllers.CartController.checkoutCart)
   );
-  router.get("/carts", asyncHandle(Controllers.CartController.getAllCarts));
-  router.get("/carts/:id", asyncHandle(Controllers.CartController.getCartById));
+  router.get(
+    "/carts",
+    middlewares.asyncHandle(Controllers.CartController.getAllCarts)
+  );
+  router.get(
+    "/carts/:id",
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.asyncHandle(Controllers.CartController.getCartById)
+  );
   router.delete(
     "/carts/:id",
-    asyncHandle(Controllers.CartController.deleteCart)
+    middlewares.requireRoles([userRoles.USER]),
+    middlewares.asyncHandle(Controllers.CartController.deleteCart)
   );
 
   // Cart Item Routes
   router.post(
     "/cart-items",
-    validate(DTOs.InsertCartItemRequest),
-    asyncHandle(Controllers.CartItemController.insertCartItem)
+    middlewares.requireRoles([userRoles.USER]),
+    middlewares.validate(DTOs.InsertCartItemRequest),
+    middlewares.asyncHandle(Controllers.CartItemController.insertCartItem)
   );
   router.get(
     "/cart-items",
-    asyncHandle(Controllers.CartItemController.getCartItems)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.asyncHandle(Controllers.CartItemController.getCartItems)
   );
   router.get(
     "/cart-items/carts/:cart_id",
-    asyncHandle(Controllers.CartItemController.getCartItemByCartId)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.asyncHandle(Controllers.CartItemController.getCartItemByCartId)
   );
   router.put(
     "/cart-items/:id",
-    asyncHandle(Controllers.CartItemController.updateCartItem)
+    middlewares.requireRoles([userRoles.USER]),
+    middlewares.asyncHandle(Controllers.CartItemController.updateCartItem)
   );
   router.delete(
     "/cart-items/:id",
-    asyncHandle(Controllers.CartItemController.deleteCartItem)
+    middlewares.requireRoles([userRoles.USER]),
+    middlewares.asyncHandle(Controllers.CartItemController.deleteCartItem)
   );
 
   // Feedback Routes
   router.post(
     "/feedbacks",
-    validate(DTOs.InsertFeedBackRequest),
-    asyncHandle(Controllers.FeedbackController.insertFeedback)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.validate(DTOs.InsertFeedBackRequest),
+    middlewares.asyncHandle(Controllers.FeedbackController.insertFeedback)
   );
   router.get(
     "/feedbacks",
-    asyncHandle(Controllers.FeedbackController.getFeedbacks)
+    middlewares.asyncHandle(Controllers.FeedbackController.getFeedbacks)
   );
   router.get(
     "/feedbacks/:id",
-    asyncHandle(Controllers.FeedbackController.getFeedbackById)
+    middlewares.asyncHandle(Controllers.FeedbackController.getFeedbackById)
   );
   router.put(
     "/feedbacks/:id",
-    validate(DTOs.UpdateFeedbackRequest),
-    asyncHandle(Controllers.FeedbackController.updateFeedback)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.validate(DTOs.UpdateFeedbackRequest),
+    middlewares.asyncHandle(Controllers.FeedbackController.updateFeedback)
   );
   router.delete(
     "/feedbacks/:id",
-    asyncHandle(Controllers.FeedbackController.deleteFeedback)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.asyncHandle(Controllers.FeedbackController.deleteFeedback)
   );
 
   //  Promotion Routes
   router.post(
     "/promotions",
-    validate(DTOs.InsertPromotionRequest),
-    asyncHandle(Controllers.PromotionController.insertPromotion)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.InsertPromotionRequest),
+    middlewares.asyncHandle(Controllers.PromotionController.insertPromotion)
   );
   router.get(
     "/promotions",
-    asyncHandle(Controllers.PromotionController.getPromotions)
+    middlewares.asyncHandle(Controllers.PromotionController.getPromotions)
   );
   router.get(
     "/promotions/:id",
-    asyncHandle(Controllers.PromotionController.getPromotionById)
+    middlewares.asyncHandle(Controllers.PromotionController.getPromotionById)
   );
   router.put(
     "/promotions/:id",
-    validate(DTOs.UpdatePromotionRequest),
-    asyncHandle(Controllers.PromotionController.updatePromotion)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.UpdatePromotionRequest),
+    middlewares.asyncHandle(Controllers.PromotionController.updatePromotion)
   );
   router.delete(
     "/promotions/:id",
-    asyncHandle(Controllers.PromotionController.deletePromotion)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.PromotionController.deletePromotion)
   );
 
   //  Promotion Detail Routes
   router.post(
     "/promotion-details",
-    validate(DTOs.InsertPromotionDetailRequest),
-    asyncHandle(Controllers.PromotionDetailController.insertPromotionDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.InsertPromotionDetailRequest),
+    middlewares.asyncHandle(
+      Controllers.PromotionDetailController.insertPromotionDetail
+    )
   );
   router.get(
     "/promotion-details",
-    asyncHandle(Controllers.PromotionDetailController.getPromotionDetails)
+    middlewares.asyncHandle(
+      Controllers.PromotionDetailController.getPromotionDetails
+    )
   );
   router.get(
     "/promotion-details/:id",
-    asyncHandle(Controllers.PromotionDetailController.getPromotionDetailById)
+    middlewares.asyncHandle(
+      Controllers.PromotionDetailController.getPromotionDetailById
+    )
   );
   router.put(
     "/promotion-details/:id",
-    validate(DTOs.UpdatePromotionDetailRequest),
-    asyncHandle(Controllers.PromotionDetailController.updatePromotionDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.UpdatePromotionDetailRequest),
+    middlewares.asyncHandle(
+      Controllers.PromotionDetailController.updatePromotionDetail
+    )
   );
   router.delete(
     "/promotion-details/:id",
-    asyncHandle(Controllers.PromotionDetailController.deletePromotionDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(
+      Controllers.PromotionDetailController.deletePromotionDetail
+    )
   );
 
   // News Routes
   router.post(
     "/news",
-    isImageExisted,
-    validate(DTOs.InsertNewsRequest),
-    asyncHandle(Controllers.NewController.insertNewsArticles)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.isImageExisted,
+    middlewares.validate(DTOs.InsertNewsRequest),
+    middlewares.asyncHandle(Controllers.NewController.insertNewsArticles)
   );
-  router.get("/news", asyncHandle(Controllers.NewController.getNewsArticles));
-  router.get("/news/:id", asyncHandle(Controllers.NewController.getNewsById));
+  router.get(
+    "/news",
+    middlewares.asyncHandle(Controllers.NewController.getNewsArticles)
+  );
+  router.get(
+    "/news/:id",
+    middlewares.asyncHandle(Controllers.NewController.getNewsById)
+  );
   router.put(
     "/news/:id",
-    isImageExisted,
-    validate(DTOs.UpdateNewsRequest),
-    asyncHandle(Controllers.NewController.updateNewsArticles)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.isImageExisted,
+    middlewares.validate(DTOs.UpdateNewsRequest),
+    middlewares.asyncHandle(Controllers.NewController.updateNewsArticles)
   );
   router.delete(
     "/news/:id",
-    asyncHandle(Controllers.NewController.deleteNewsArticles)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.NewController.deleteNewsArticles)
   );
 
   // News Detail Routes
   router.post(
     "/news-detail",
-    validate(DTOs.InsertNewsDetailRequest),
-    asyncHandle(Controllers.NewsDetailController.insertNewsDetail)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.InsertNewsDetailRequest),
+    middlewares.asyncHandle(Controllers.NewsDetailController.insertNewsDetail)
   );
   router.get(
     "/news-detail",
-    asyncHandle(Controllers.NewsDetailController.getNewsDetails)
+    middlewares.asyncHandle(Controllers.NewsDetailController.getNewsDetails)
   );
   router.get(
     "/news-detail/:id",
-    asyncHandle(Controllers.NewsDetailController.getNewsDetailById)
+    middlewares.asyncHandle(Controllers.NewsDetailController.getNewsDetailById)
   );
   router.put(
     "/news-detail/:id",
-    validate(DTOs.UpdateNewsDetailRequest),
-    asyncHandle(Controllers.NewsDetailController.updateNewsDetails)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.validate(DTOs.UpdateNewsDetailRequest),
+    middlewares.asyncHandle(Controllers.NewsDetailController.updateNewsDetails)
   );
   router.delete(
     "/news-detail/:id",
-    asyncHandle(Controllers.NewsDetailController.deleteArtists)
+    middlewares.requireRoles([userRoles.ADMIN]),
+    middlewares.asyncHandle(Controllers.NewsDetailController.deleteNewsDetails)
   );
 
   // Image Routes
   router.post(
     "/images/upload",
-    upload.single("image"),
-    asyncHandle(Controllers.ImageController.uploadImage)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.upload.single("image"),
+    middlewares.asyncHandle(Controllers.ImageController.uploadImage)
   );
   router.post(
     "/images/cloudinary/upload",
-    uploadCloudinary.single("image"),
-    asyncHandle(Controllers.ImageController.uploadCloundinary)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.uploadCloudinary.single("image"),
+    middlewares.asyncHandle(Controllers.ImageController.uploadCloundinary)
   );
-  router.delete("/images/delete", Controllers.ImageController.deletedImage);
+  router.delete(
+    "/images/delete",
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    Controllers.ImageController.deletedImage
+  );
   router.get(
     "/images/:fileName",
-    asyncHandle(Controllers.ImageController.viewImages)
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.asyncHandle(Controllers.ImageController.viewImages)
   );
 
   app.use("/api/", router);

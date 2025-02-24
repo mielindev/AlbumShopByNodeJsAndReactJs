@@ -1,17 +1,30 @@
 import { Op, Sequelize } from "sequelize";
 import db from "../models";
-
 import argon2 from "argon2";
 import UserResponse from "../dtos/responses/user/UserResponse.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const register = async (req, res) => {
-  const { email, password } = req.body;
-  const isEmailExisted = await db.User.findOne({
-    where: { email },
+  const { email, phone, password } = req.body;
+
+  if (!email && !phone) {
+    return res.status(400).json({
+      message: "Cần cung cấp email hoặc số điện thoại",
+    });
+  }
+
+  const condition = {};
+  if (email) condition.email = email;
+  if (phone) condition.phone = phone;
+
+  const isDuplicated = await db.User.findOne({
+    where: condition,
   });
-  if (isEmailExisted) {
+  if (isDuplicated) {
     return res.status(409).json({
-      message: "Email đã tồn tại",
+      message: "Email hoặc số điện thoại đã tồn tại",
     });
   }
   const hashedPassword = await argon2.hash(password);
@@ -30,6 +43,52 @@ export const register = async (req, res) => {
     });
   }
 };
+
+export const userLogin = async (req, res) => {
+  const { email, phone, password } = req.body;
+
+  if (!email && !phone) {
+    return res.status(400).json({
+      message: "Vui lòng nhập email hoặc số điện thoại",
+    });
+  }
+
+  const condition = {};
+  if (email) condition.email = email;
+  if (phone) condition.phone = phone;
+
+  const user = await db.User.findOne({
+    where: condition,
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      message: "Tài khoản hoặc mật khẩu không chính xác",
+    });
+  }
+
+  const passwordValid =
+    password && (await argon2.verify(user.password, password));
+
+  if (!passwordValid) {
+    return res.status(401).json({
+      message: "Tài khoản hoặc mật khẩu không chính xác",
+    });
+  }
+
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SERECT_KEY, {
+    expiresIn: process.env.JWT_EXPIRATION,
+  });
+
+  return res.status(200).json({
+    message: "Đăng nhập thành công",
+    data: {
+      user: new UserResponse(user),
+      token,
+    },
+  });
+};
+
 export const getUsers = async (req, res) => {
   const { search = "", page = 1, pageSize = 10 } = req.query;
   const offset = (page - 1) * pageSize;
