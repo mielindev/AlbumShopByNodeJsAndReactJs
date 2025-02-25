@@ -1,5 +1,6 @@
 import { Op, Sequelize } from "sequelize";
 import db from "../models";
+import { getImageUrl } from "../helpers/imageHelper";
 
 // Add a new artist
 export const insertArtist = async (req, res) => {
@@ -45,9 +46,10 @@ export const getArtists = async (req, res) => {
   ]);
   return res.status(200).json({
     message: "Lấy danh sách nghệ sĩ thành công",
-    data: artists.map((artist) => {
-      return artist;
-    }),
+    data: artists.map((artist) => ({
+      ...artist.get({ plain: true }),
+      image: getImageUrl(artist.image),
+    })),
     current_page: page,
     total_pages: Math.ceil(totalArtists / pageSize),
     total: totalArtists,

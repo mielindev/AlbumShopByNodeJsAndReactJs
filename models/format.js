@@ -24,6 +24,8 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Format",
       tableName: "formats",
       underscored: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
     }
   );
   return Format;

@@ -70,7 +70,7 @@ export const getAllCarts = async (req, res) => {
     data: carts,
     current_page: parsePage,
     total_pages: Math.ceil(totalCarts / parsePageSize),
-    totalCarts,
+    total: totalCarts,
   });
 };
 

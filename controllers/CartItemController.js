@@ -119,7 +119,7 @@ export const getCartItems = async (req, res) => {
     data: cartItems,
     current_page: parsePage,
     total_pages: Math.ceil(totalCartItems / parsePageSize),
-    totalCartItems,
+    total: totalCartItems,
   });
 };
 

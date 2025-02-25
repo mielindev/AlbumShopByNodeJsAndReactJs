@@ -44,7 +44,7 @@ export const getPromotions = async (req, res) => {
     data: promotions,
     current_page: parsePage,
     total_pages: Math.ceil(totalPromotions / parsePageSize),
-    totalPromotions,
+    total: totalPromotions,
   });
 };
 

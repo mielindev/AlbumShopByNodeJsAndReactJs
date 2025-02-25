@@ -63,7 +63,7 @@ export const getGenreDetails = async (req, res) => {
     data: genreDetails,
     current_page: prasedPage,
     total_pages: Math.ceil(totalGenreDetails / parsedPageSize),
-    totalGenreDetails,
+    total: totalGenreDetails,
   });
 };
 
