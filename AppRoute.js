@@ -30,6 +30,11 @@ export const AppRoute = (app) => {
     middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
     middlewares.asyncHandle(Controllers.UserController.getUserById)
   );
+  router.put(
+    "/users/:id",
+    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    middlewares.asyncHandle(Controllers.UserController.updateUser)
+  );
   router.delete(
     "/users/:id",
     middlewares.requireRoles([userRoles.ADMIN]),
@@ -489,7 +494,7 @@ export const AppRoute = (app) => {
   );
   router.get(
     "/images/:fileName",
-    middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
+    // middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
     middlewares.asyncHandle(Controllers.ImageController.viewImages)
   );
 

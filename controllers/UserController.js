@@ -4,6 +4,8 @@ import argon2 from "argon2";
 import UserResponse from "../dtos/responses/user/UserResponse.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import os from "os";
+import { getImageUrl } from "../helpers/imageHelper.js";
 dotenv.config();
 
 export const register = async (req, res) => {
@@ -67,6 +69,12 @@ export const userLogin = async (req, res) => {
     });
   }
 
+  if (user.is_locked) {
+    return res.status(423).json({
+      message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ để được hỗ trợ.",
+    });
+  }
+
   const passwordValid =
     password && (await argon2.verify(user.password, password));
 
@@ -76,9 +84,13 @@ export const userLogin = async (req, res) => {
     });
   }
 
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SERECT_KEY, {
-    expiresIn: process.env.JWT_EXPIRATION,
-  });
+  const token = jwt.sign(
+    { id: user.id, iat: Math.floor(Date.now() / 1000) },
+    process.env.JWT_SERECT_KEY,
+    {
+      expiresIn: process.env.JWT_EXPIRATION,
+    }
+  );
 
   return res.status(200).json({
     message: "Đăng nhập thành công",
@@ -130,7 +142,7 @@ export const getUserById = async (req, res) => {
   if (user) {
     return res.status(200).json({
       message: "Lấy thông tin người dùng thành công",
-      data: user,
+      data: { ...user, avtart: getImageUrl(user.avatar) },
     });
   } else {
     return res.status(404).json({
@@ -153,4 +165,60 @@ export const deleteUser = async (req, res) => {
       message: "Xoá người dùng thất bại",
     });
   }
+};
+
+export const updateUser = async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { name, old_password, new_password, avatar, address, role, is_locked } =
+    req.body;
+
+  // Nếu id của JWT khác id được sửa hoặc không phải ADMIN thì chặn
+  if (req.user.id !== id && req.user.role !== 2) {
+    return res.status(403).json({
+      message: "Không có quyền thay đổi thông tin người dùng này",
+    });
+  }
+
+  const user = await db.User.findByPk(id);
+
+  if (!user) {
+    return res.status(404).json({
+      message: "Người dùng không tồn tại",
+    });
+  }
+
+  // Chỉ ADMIN mới có thể cập nhật role và is_locked
+  if (req.user.role === 2) {
+    user.role = role ? role : user.role;
+    user.is_locked = is_locked;
+  }
+
+  // Chỉ người dùng mới có thể đổi mật khẩu - ADMIN không thể đổi mật khẩu của người dùng
+  if (req.user.id === id) {
+    if (new_password && old_password) {
+      const passwordValid = await argon2.verify(user.password, old_password);
+      if (!passwordValid) {
+        return res.status(401).json({
+          message: "Mật khẩu cũ không chính xác",
+        });
+      }
+      user.password = await argon2.hash(new_password);
+      user.password_changed_at = new Date();
+    } else if (new_password || old_password) {
+      return res.status(400).json({
+        message:
+          "Cần cung cấp mật khẩu cũ và mật khẩu mới để cập nhật mật khẩu",
+      });
+    }
+    user.name = name || user.name;
+    user.address = address || user.address;
+    user.avatar = avatar || user.avatar;
+  }
+
+  await user.save();
+
+  return res.status(200).json({
+    message: "Cập nhật thông tin người dùng thành công",
+    data: new UserResponse(user),
+  });
 };

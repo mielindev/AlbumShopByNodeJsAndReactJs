@@ -1,3 +1,5 @@
+import { getImageUrl } from "../../../helpers/imageHelper";
+
 class UserResponse {
   constructor(user) {
     this.id = user.id;
@@ -5,7 +7,7 @@ class UserResponse {
     this.email = user.email;
     this.phone = user.phone;
     this.address = user.address;
-    this.avatar = user.avatar;
+    this.avatar = getImageUrl(user.avatar);
   }
 }
 export default UserResponse;

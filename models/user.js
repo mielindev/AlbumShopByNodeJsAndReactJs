@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       address: DataTypes.TEXT,
       avatar: DataTypes.TEXT,
       is_locked: DataTypes.BOOLEAN,
+      password_changed_at: DataTypes.DATE,
     },
     {
       sequelize,
