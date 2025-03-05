@@ -50,7 +50,7 @@ export const getArtists = async (req, res) => {
       ...artist.get({ plain: true }),
       image: getImageUrl(artist.image),
     })),
-    current_page: page,
+    current_page: parseInt(page, 10),
     total_pages: Math.ceil(totalArtists / pageSize),
     total: totalArtists,
   });

@@ -6,8 +6,11 @@ class UserResponse {
     this.name = user.name;
     this.email = user.email;
     this.phone = user.phone;
+    this.role = user.role;
     this.address = user.address;
     this.avatar = getImageUrl(user.avatar);
+    this.is_locked = user.is_locked;
+    this.username = user.username;
   }
 }
 export default UserResponse;

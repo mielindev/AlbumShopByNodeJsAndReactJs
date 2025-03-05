@@ -35,10 +35,10 @@ export const AppRoute = (app) => {
     middlewares.requireRoles([userRoles.ADMIN, userRoles.USER]),
     middlewares.asyncHandle(Controllers.UserController.updateUser)
   );
-  router.delete(
+  router.patch(
     "/users/:id",
     middlewares.requireRoles([userRoles.ADMIN]),
-    middlewares.asyncHandle(Controllers.UserController.deleteUser)
+    middlewares.asyncHandle(Controllers.UserController.lockUser)
   );
 
   // Artist Routes

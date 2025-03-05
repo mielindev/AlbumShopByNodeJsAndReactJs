@@ -1,32 +1,21 @@
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
 import db from "../models";
 import argon2 from "argon2";
 import UserResponse from "../dtos/responses/user/UserResponse.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import os from "os";
 import { getImageUrl } from "../helpers/imageHelper.js";
 dotenv.config();
 
 export const register = async (req, res) => {
-  const { email, phone, password } = req.body;
-
-  if (!email && !phone) {
-    return res.status(400).json({
-      message: "Cần cung cấp email hoặc số điện thoại",
-    });
-  }
-
-  const condition = {};
-  if (email) condition.email = email;
-  if (phone) condition.phone = phone;
+  const { password, username } = req.body;
 
   const isDuplicated = await db.User.findOne({
-    where: condition,
+    where: { username },
   });
   if (isDuplicated) {
     return res.status(409).json({
-      message: "Email hoặc số điện thoại đã tồn tại",
+      message: "Tên đăng nhập đã tồn tại",
     });
   }
   const hashedPassword = await argon2.hash(password);
@@ -47,31 +36,15 @@ export const register = async (req, res) => {
 };
 
 export const userLogin = async (req, res) => {
-  const { email, phone, password } = req.body;
-
-  if (!email && !phone) {
-    return res.status(400).json({
-      message: "Vui lòng nhập email hoặc số điện thoại",
-    });
-  }
-
-  const condition = {};
-  if (email) condition.email = email;
-  if (phone) condition.phone = phone;
+  const { username, password } = req.body;
 
   const user = await db.User.findOne({
-    where: condition,
+    where: { username },
   });
 
   if (!user) {
     return res.status(404).json({
       message: "Tài khoản hoặc mật khẩu không chính xác",
-    });
-  }
-
-  if (user.is_locked) {
-    return res.status(423).json({
-      message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ để được hỗ trợ.",
     });
   }
 
@@ -81,6 +54,12 @@ export const userLogin = async (req, res) => {
   if (!passwordValid) {
     return res.status(401).json({
       message: "Tài khoản hoặc mật khẩu không chính xác",
+    });
+  }
+
+  if (user.is_locked) {
+    return res.status(423).json({
+      message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ để được hỗ trợ.",
     });
   }
 
@@ -95,8 +74,7 @@ export const userLogin = async (req, res) => {
   return res.status(200).json({
     message: "Đăng nhập thành công",
     data: {
-      user: new UserResponse(user),
-      token,
+      user: { ...user.get({ plain: true }), accessToken: token },
     },
   });
 };
@@ -115,6 +93,7 @@ export const getUsers = async (req, res) => {
       ],
     };
   }
+
   const [users, totalusers] = await Promise.all([
     await db.User.findAll({
       where: whereClause,
@@ -142,7 +121,7 @@ export const getUserById = async (req, res) => {
   if (user) {
     return res.status(200).json({
       message: "Lấy thông tin người dùng thành công",
-      data: { ...user, avtart: getImageUrl(user.avatar) },
+      data: { ...user.get({ plain: true }), avtart: getImageUrl(user.avatar) },
     });
   } else {
     return res.status(404).json({
@@ -151,18 +130,21 @@ export const getUserById = async (req, res) => {
   }
 };
 
-export const deleteUser = async (req, res) => {
+export const lockUser = async (req, res) => {
   const { id } = req.params;
-  const deleted = await db.User.destroy({
-    where: { id },
-  });
-  if (deleted) {
+  const [updated] = await db.User.update(
+    { is_locked: 1 },
+    {
+      where: { id },
+    }
+  );
+  if (updated > 0) {
     return res.status(200).json({
-      message: "Xoá người dùng thành công",
+      message: "Khoá người dùng thành công",
     });
   } else {
     return res.status(500).json({
-      message: "Xoá người dùng thất bại",
+      message: "Khoá người dùng thất bại",
     });
   }
 };
