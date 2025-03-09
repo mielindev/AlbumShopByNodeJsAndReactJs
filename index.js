@@ -3,7 +3,7 @@ import express from "express";
 import { AppRoute } from "./AppRoute.js";
 dotenv.config();
 const app = express();
-const port = process?.env?.PORT || 3000;
+const port = process?.env?.PORT || 3030;
 
 // Middleware to parse JSON request bodies
 app.use(express.json());

@@ -171,7 +171,7 @@ export const updateUser = async (req, res) => {
 
   // Chỉ ADMIN mới có thể cập nhật role và is_locked
   if (req.user.role === 2) {
-    user.role = role ? role : user.role;
+    user.role = role;
     user.is_locked = is_locked;
   }
 

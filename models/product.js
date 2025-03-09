@@ -11,9 +11,11 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Product.belongsTo(models.Artist, {
         foreignKey: "artist_id",
+        as: "artist",
       });
       Product.belongsTo(models.Label, {
         foreignKey: "label_id",
+        as: "label",
       });
       Product.hasMany(models.OrderDetail, {
         foreignKey: "product_id",
@@ -27,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       Product.hasMany(models.FormatDetail, {
         foreignKey: "product_id",
+        as: "format_details",
       });
       Product.hasMany(models.GenreDetail, {
         foreignKey: "product_id",

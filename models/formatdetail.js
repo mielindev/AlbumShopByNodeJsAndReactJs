@@ -11,9 +11,11 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       FormatDetail.belongsTo(models.Product, {
         foreignKey: "product_id",
+        as: "format_details",
       });
       FormatDetail.belongsTo(models.Format, {
         foreignKey: "format_id",
+        as: "format",
       });
     }
   }

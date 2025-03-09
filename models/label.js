@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Label.hasMany(models.Product, {
         foreignKey: "label_id",
+        as: "label",
       });
     }
   }

@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Format.hasMany(models.FormatDetail, {
         foreignKey: "format_id",
+        as: "format",
       });
     }
   }

@@ -241,10 +241,10 @@ export const AppRoute = (app) => {
     middlewares.validate(DTOs.UpdateProductRequest),
     middlewares.asyncHandle(Controllers.ProductController.updateProduct)
   );
-  router.delete(
-    "/products/:id",
+  router.put(
+    "/products/:id/lock",
     middlewares.requireRoles([userRoles.ADMIN]),
-    middlewares.asyncHandle(Controllers.ProductController.deleteProduct)
+    middlewares.asyncHandle(Controllers.ProductController.lockProduct)
   );
 
   // Order Routes
