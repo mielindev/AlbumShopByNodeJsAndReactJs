@@ -185,12 +185,6 @@ export const checkoutCart = async (req, res) => {
       },
       { transaction }
     );
-    await db.Cart.destroy(
-      {
-        where: { id: cart_id },
-      },
-      { transaction }
-    );
 
     // Commit transaction
     await transaction.commit();
