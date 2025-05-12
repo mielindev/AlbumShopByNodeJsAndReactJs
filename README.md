@@ -30,9 +30,6 @@ An online music album store built using **Node.js** for the backend and **React.
 
 ### Backend
 - Node.js
-- Express.js
-- MongoDB or MySQL (update this based on your DB)
+- MySQL
 - JWT Authentication
-- Multer for file uploads (if applicable)
-
----
+- Multer for file uploads
