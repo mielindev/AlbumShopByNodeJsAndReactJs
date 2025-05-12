@@ -36,10 +36,3 @@ An online music album store built using **Node.js** for the backend and **React.
 - Multer for file uploads (if applicable)
 
 ---
-
-## 📦 Installation
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/album-ecommerce.git
-cd album-ecommerce
